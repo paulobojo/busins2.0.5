@@ -327,6 +327,12 @@ html,body{height:auto !important;}
 .tabbar .tab{flex:0 1 180px !important;}
 .tabbar{justify-content:space-around !important;}
 .wrap{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 90px) !important;}
+/* barra mais evidente */
+.tabbar{background:rgba(255,255,255,.96) !important; border-top:1px solid rgba(0,0,0,.14) !important; box-shadow:0 -4px 16px rgba(0,0,0,.06) !important; padding-top:0 !important;}
+.tabbar .tab{position:relative; color:#6E6E6B !important; padding-top:12px !important;}
+.tabbar .tab svg{width:24px !important; height:24px !important;}
+.tabbar .tab.active{color:var(--ink) !important;}
+.tabbar .tab.active::before{content:""; position:absolute; top:0; left:50%; transform:translateX(-50%); width:36px; height:3px; border-radius:0 0 3px 3px; background:var(--ink);}
 </style>
 </head>
 <body>
