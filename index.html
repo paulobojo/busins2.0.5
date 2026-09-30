@@ -211,7 +211,7 @@ button{font:inherit; color:inherit; border:0; background:none; padding:0; cursor
 .sec .ttl{font-size:20px !important; letter-spacing:-.015em;}
 .sec .m{color:var(--sub) !important; font-weight:500 !important;}
 .note b{color:var(--ink) !important;}
-.bestK{color:var(--sub) !important;}
+.bestK{color:var(--acc) !important;}
 .row:not(.on){padding:12px 22px !important; align-items:center !important;}
 .row:not(.on) .name{font-size:17px !important; line-height:1.25 !important;}
 .row:not(.on) .via{display:none !important;}
@@ -413,6 +413,15 @@ html,body{height:auto !important;}
 .nxOne .inRed{white-space:nowrap;}
 .nw{white-space:nowrap;}
 .nxOne .chip{margin-right:6px; vertical-align:1px;}
+.opt.bestOpt{position:relative;}
+.bestTag{flex-basis:100%; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--acc); margin-bottom:4px;}
+.opt.bestOpt{flex-wrap:wrap;}
+#pList .pastBtn2{margin:14px 22px;}
+.pastRow{display:block; width:100%; text-align:center; padding:14px 22px; font-size:14px; font-weight:500; color:var(--sub); border-bottom:1px solid var(--rule);}
+.pastRow:active{background:var(--soft);}
+.pastRow .chev{display:inline-block; margin-left:4px; font-size:15px; transform:translateY(-2px);}
+.pastRow .chev.up{transform:rotate(180deg) translateY(-2px);}
+.domNote{margin-top:6px; font-size:13px; color:var(--sub);}
 </style>
 </head>
 <body>
@@ -449,7 +458,7 @@ html,body{height:auto !important;}
     <div class="pSegWrap"><div class="seg" id="pSeg"><div class="segThumb" id="pThumb"></div></div></div>
     <div id="pSjmTop"></div>
     <div id="pBest"></div>
-    <div id="pOtherHead"><div class="sec"><div class="ttl">Outras opções</div><div class="m" id="pCount"></div></div>
+    <div id="pOtherHead"><div class="sec"><div class="ttl">Todas as opções</div><div class="m" id="pCount"></div></div>
     <div class="rule"></div></div>
     <div id="pList"></div>
     <div id="pSjmBottom"></div>
@@ -625,7 +634,7 @@ const OAZ_VDC = [
 ];
 const MIN_XFER = 5; // minutos mínimos para a troca
 const TIGHT = 10;   // abaixo disto, avisar que a troca é apertada
-let pstate = { dir:"ida", per:"esc", spin:false, day:today() };
+let pstate = { dir:"ida", per:"esc", spin:false, day:today(), showPast:false };
 
 function fromMin(m){ return pad(Math.floor(m/60))+":"+pad(m%60); }
 function durTxt(m){ const h=Math.floor(m/60), r=m%60; return h ? `${h}h${r?pad(r):""}` : `${r} min`; }
@@ -697,7 +706,12 @@ function portoOptions(dayType){
   }
   // só compara opções que partem do mesmo sítio (Campanhã e Camélias são sítios diferentes)
   const org = o => o.legs[0].stops[0];
-  const keep = opts.filter(o=> !opts.some(q=> q!==o && org(q)===org(o) && q.dep>=o.dep && q.arr<=o.arr && (q.dep>o.dep || q.arr<o.arr)));
+  // mantém todas as opções; marca as que têm uma alternativa melhor do mesmo sítio (sai depois e chega antes ou à mesma hora)
+  opts.forEach(o=>{
+    const better = opts.filter(q=> q!==o && org(q)===org(o) && q.dep>o.dep && q.arr<=o.arr).sort((a,b)=>a.arr-b.arr || b.dep-a.dep)[0];
+    o.dom = better || null;
+  });
+  const keep = opts;
   // se duas opções do mesmo sítio forem iguais (mesma partida e chegada), fica a direta
   const uniq = keep.filter((o,i)=> !keep.some((q,j)=> j<i && org(q)===org(o) && q.dep===o.dep && q.arr===o.arr));
   return uniq.sort((a,b)=>a.dep-b.dep);
@@ -817,7 +831,7 @@ function renderPSeg(){
     const btn=document.createElement("button");
     btn.className="segBtn"+(d===pstate.day?" active":"");
     btn.innerHTML=DAYS[d]+(d===today()?'<span class="td">hoje</span>':"");
-    btn.onclick=()=>{ pstate.day=d; renderPorto(); };
+    btn.onclick=()=>{ pstate.day=d; pstate.showPast=false; renderPorto(); };
     seg.appendChild(btn);
   });
   document.getElementById("pThumb").style.transform=`translateX(${keys.indexOf(pstate.day)*100}%)`;
@@ -833,7 +847,7 @@ function renderPorto(){
     <div class="route" id="pRoute"><div class="k">De</div><div class="v">${a}</div><div class="gap"></div><div class="k">Para</div><div class="v">${b}</div></div>
     <button class="inv ${pstate.spin?"spin":""}" id="pSwap" aria-label="Inverter sentido">${SWAP}</button></div>`;
   document.getElementById("pSwap").onclick = ()=>{
-    pstate.dir = pstate.dir==="ida"?"volta":"ida"; pstate.spin=!pstate.spin;
+    pstate.dir = pstate.dir==="ida"?"volta":"ida"; pstate.spin=!pstate.spin; pstate.showPast=false;
     if(navigator.vibrate) navigator.vibrate(8);
     document.getElementById("pSwap").classList.toggle("spin", pstate.spin);
     document.getElementById("pRoute").classList.add("fade");
@@ -852,10 +866,12 @@ function renderPorto(){
   sB.innerHTML = hasOpts ? sjmHTML(sjmL, false, isSel) : "";
   [sT,sB].forEach(box=> box.querySelectorAll(".opt.sjm").forEach(x=> x.onclick=()=> openTrip(sjmL[+x.dataset.s])));
   const best = document.getElementById("pBest"), list=document.getElementById("pList");
-  const optRow = (o,idx,past) => `<button class="opt${past?" pastOpt":""}" data-${past?"p":"i"}="${idx}">
-      <div class="mid"><div class="tt num">${fromMin(o.dep)} <span class="ttFrom">${fromTxt(o.legs[0].stops[0])}</span></div><div class="legs">${legsHTML(o,true,past)}</div></div>
+  const optRow = (o,idx,past,isBest) => `<button class="opt${past?" pastOpt":""}${isBest?" bestOpt":""}" data-${past?"p":"i"}="${idx}">
+      <div class="mid"><div class="tt num">${fromMin(o.dep)} <span class="ttFrom">${fromTxt(o.legs[0].stops[0])}</span></div><div class="legs">${legsHTML(o,true,past)}</div>${o.dom&&!past?`<div class="domNote">Se puderes esperar, o ${o.dom.legs[0].line} das ${fromMin(o.dom.dep)} chega ${o.dom.arr<o.arr?"antes, às "+fromMin(o.dom.arr):"à mesma hora"}.</div>`:""}</div>
       </button>`;
+  const pastToggle = pastOpts.length ? `<button class="pastRow" id="pPastBtn">${pstate.showPast?"Esconder anteriores":`${pastOpts.length} ${pastOpts.length===1?"horário anterior":"horários anteriores"}`} <span class="chev ${pstate.showPast?"up":""}">⌄</span></button>` : "";
   const pastHTML = pastOpts.map((o,k)=>optRow(o,k,true)).join("");
+  const bindToggle = ()=>{ const b=document.getElementById("pPastBtn"); if(b) b.onclick=()=>{ pstate.showPast=!pstate.showPast; renderPorto(); }; };
   const bindPast = ()=> list.querySelectorAll(".opt.pastOpt").forEach(x=> x.onclick=()=> openTrip(pastOpts[+x.dataset.p]));
   document.getElementById("pOtherHead").hidden = !hasOpts && !pastOpts.length;
   if(!hasOpts){
@@ -864,7 +880,7 @@ function renderPorto(){
     list.innerHTML = pastHTML; bindPast(); setPNote(dt); return;
   }
   const isToday = isSel, dayLbl = "neste dia";
-  const o0 = opts[0];
+  const o0 = opts.find(o=>!o.dom) || opts[0];
   const d = o0.dep-now, h=Math.floor(d/60), m=d%60;
   const inTxt = !isToday ? DAYS[dt] : d<=0 ? "Agora" : "daqui a " + (h ? `${h}h${m?pad(m):""}` : `${m} min`);
   best.innerHTML = `
@@ -875,12 +891,10 @@ function renderPorto(){
       ${bestRest(o0)}
     </button>`;
   document.getElementById("bestBtn").onclick = ()=> openTrip(o0);
-  const rest = opts.slice(1);
-  document.getElementById("pCount").textContent = rest.length ? `${rest.length} ${isToday?"hoje":dayLbl}` : "";
-  list.innerHTML = pastHTML + (rest.length ? rest.map((o,i)=>optRow(o,i+1,false)).join("")
-    : `<div class="pNone"><div class="b">Não há mais opções ${isToday?"hoje":dayLbl}.</div></div>`);
+  document.getElementById("pCount").textContent = `${opts.length} ${isToday?"hoje":dayLbl}`;
+  list.innerHTML = pastToggle + (pstate.showPast ? pastHTML : "") + opts.map((o,i)=>optRow(o,i,false,i===0)).join("");
   list.querySelectorAll(".opt:not(.pastOpt)").forEach(x=> x.onclick=()=> openTrip(opts[+x.dataset.i]));
-  bindPast();
+  bindPast(); bindToggle();
   setPNote(dt);
 }
 function setPNote(dt){
@@ -927,4 +941,3 @@ setInterval(()=>{ tick(); renderNext(); renderTimes(); }, 30000);
 </script>
 </body>
 </html>
-
