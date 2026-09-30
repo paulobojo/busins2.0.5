@@ -360,6 +360,59 @@ html,body{height:auto !important;}
 .inv:active{background:#D2D2CF !important;}
 .holBanner{margin:16px 22px 0; padding:12px 14px; background:#FCEBC9; color:#6B3B00; font-size:13.5px; line-height:1.45; border-radius:var(--r);}
 .holBanner b{color:#6B3B00;}
+.altLine{flex-basis:100%; margin-top:4px; font-size:12.5px; color:#6B3B00;}
+/* "daqui a…" só texto */
+.nxTop{align-items:baseline !important;}
+.nxIn{background:transparent !important; color:var(--acc) !important; padding:0 !important; border:0 !important; border-radius:0 !important;
+  font-size:19px !important; font-weight:600 !important; white-space:nowrap;}
+.inLine{margin-top:8px; font-size:19px; font-weight:600; color:var(--acc);}
+.inRed{color:var(--acc); font-weight:600;}
+.bestArr{margin-top:10px !important;}
+/* percurso com horas */
+.strip{margin-top:8px; font-size:13px; color:var(--sub); line-height:1.5; display:flex; flex-wrap:wrap; gap:0 6px; align-items:baseline;}
+.strip b{color:var(--ink); font-weight:600;}
+.strip i{font-style:normal; color:var(--faint);}
+.pts{position:relative; margin-top:14px; padding-left:2px;}
+.pts::before{content:""; position:absolute; left:6px; top:12px; bottom:12px; width:2px; background:var(--rule);}
+.pt{position:relative; display:flex; align-items:center; gap:12px; padding:5px 0;}
+.pd{width:12px; height:12px; border-radius:50%; background:var(--bg); border:2px solid var(--ink); flex:0 0 auto; z-index:1;}
+.pt.z .pd{background:var(--ink);}
+.pt.m .pd{width:10px; height:10px; margin:0 1px; border-color:var(--sub);}
+.pn{flex:1; font-size:16px;}
+.pt.m .pn{color:var(--sub); font-size:15px;}
+.pv{font-size:16px; font-weight:600;}
+.pv small{font-size:11px; font-weight:500; color:var(--sub);}
+.pt.m .pv{font-size:14px;}
+.xf b{color:var(--ink); font-weight:600;}
+.legs{flex-wrap:wrap; row-gap:6px;}
+.xf{flex-basis:100%;}
+.xfw{flex-basis:100%; color:var(--sub); font-size:13px;}
+.legs .tight{margin-left:0 !important;}
+.from{color:var(--ink);}
+.nxRoute{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+.nxRoute .nxLine{display:inline-block !important;}
+.nxRoute .from{font-size:16px;}
+.chain{flex-basis:100%; color:var(--ink); line-height:1.9;}
+.chain .chip{vertical-align:1px;}
+.inLine{font-size:15px !important;}
+.best .legs{margin-top:12px !important;}
+.opt .tt .ttFrom{font-size:15px !important; color:var(--sub) !important; margin:0 0 0 6px !important; letter-spacing:0; font-weight:500;}
+.sjmDet summary{list-style:none; cursor:pointer;}
+.sjmDet summary::-webkit-details-marker{display:none;}
+.sjmDet .ver{color:var(--ink); font-weight:600; text-decoration:underline; text-underline-offset:3px;}
+.sjmDet[open] .ver{display:none;}
+.xf .tight{margin-left:4px;}
+.opt .tt{font-weight:600 !important; font-size:30px !important; letter-spacing:-.02em !important;}
+/* números de linha com contorno */
+.chip, .nxLine{background:transparent !important; color:var(--ink) !important; box-shadow:inset 0 0 0 1.5px var(--ink); font-weight:700 !important;}
+.opt.pastOpt .tt, .opt.pastOpt .ttFrom, .opt.pastOpt .legs, .opt.pastOpt .legs *{color:#A8A8A5 !important;}
+.opt.pastOpt .chip{box-shadow:inset 0 0 0 1.5px #BDBDBA !important;}
+.opt.pastOpt .tight, .opt.pastOpt .altLine{display:none !important;}
+.nxOne{font-size:16px !important;}
+.nxOne .nxLine{display:inline-block !important; margin:0 6px 0 0 !important; vertical-align:1px;}
+.nxOne .inRed{white-space:nowrap;}
+.nw{white-space:nowrap;}
+.nxOne .chip{margin-right:6px; vertical-align:1px;}
 </style>
 </head>
 <body>
@@ -460,8 +513,8 @@ function renderNext(){
   const d = toMin(trips[i][0]) - now, h = Math.floor(d/60), m = d%60;
   const inTxt = d<=0 ? "Agora" : "daqui a " + (h ? `${h}h${m?pad(m):""}` : `${m} min`);
   box.innerHTML = `
-    <div class="nxTop"><span class="nxTime num">${trips[i][0]}</span><span class="nxIn">${inTxt}</span></div>
-    <div class="nxRoute"><span class="nxLine">Linha ${DATA[state.line].title}</span></div>`;
+    <div class="nxTop"><span class="nxTime num">${trips[i][0]}</span></div>
+    <div class="bestArr nxOne"><span class="nxLine">${DATA[state.line].title}</span> Sai ${fromTxt(dirData.stops[0])} <span class="nw">· <span class="inRed">${inTxt}</span></span></div>`;
   box.onclick = ()=> openStops(dirData, trips[i]);
 }
 
@@ -540,7 +593,7 @@ function renderAll(){ holidayBanner(); renderNext(); renderLines(); renderTimes(
 function closeSheet(){ document.getElementById("ov").classList.remove("show"); }
 function openStops(dirData, trip){
   const stops = dirData.stops;
-  document.getElementById("sK").textContent = `Linha ${DATA[state.line].title} · Partida`;
+  document.getElementById("sK").textContent = `${DATA[state.line].title} · Partida`;
   document.getElementById("sT").textContent = trip[0];
   document.getElementById("sS").textContent = `${dirData.label} · ${stops.length} paragens`;
   document.getElementById("stops").innerHTML = stops.map((n,i)=>
@@ -606,9 +659,17 @@ function portoOptions(dayType){
           }
         });
       });
+      let alt=null;
+      if(best) ["1410","2026"].forEach(k=>{
+        (DATA[k].dirs.ida.trips[dayType]||[]).forEach(t2=>{
+          const dep2=toMin(t2[0]); if(dep2<=best.dep2) return;
+          const arr=toMin(t2[t2.length-1]);
+          if(!alt || arr<alt.arr || (arr===alt.arr && dep2<alt.dep)) alt={line:k, dep:dep2, arr, to:/Campanh/.test(t2.length&&DATA[k].dirs.ida.stops.slice(-1)[0])?"Campanhã":"Camélias"};
+        });
+      });
       if(best) opts.push({dep:toMin(t1[0]), arr:best.arr,
         legs:[{line:"1215", stops:a.stops, t:t1}, {line:best.k, stops:best.d.stops, t:best.t2}],
-        xfer:{kind:"sjm", at:"S. João da Madeira (CCT)", short:"S. João da Madeira", wait:best.dep2-arrSJM, line:best.k}});
+        xfer:{kind:"sjm", at:"S. João da Madeira (CCT)", short:"S. João da Madeira", wait:best.dep2-arrSJM, line:best.k, alt}});
     });
   } else {
     // Porto (1410 Campanhã / 2026 Camélias) → S. João da Madeira + 1215 → Vale de Cambra
@@ -622,15 +683,23 @@ function portoOptions(dayType){
           const dep2=toMin(t2[0]);
           if(dep2 >= arrSJM + MIN_XFER){ const arr=toMin(t2[t2.length-1]); if(!best || arr<best.arr) best={t2,dep2,arr}; }
         });
+        let alt=null;
+        if(best) (c.trips[dayType]||[]).forEach(t2=>{
+          const dep2=toMin(t2[0]); if(dep2<=best.dep2) return;
+          const arr=toMin(t2[t2.length-1]);
+          if(!alt || arr<alt.arr) alt={line:"1215", dep:dep2, arr, to:"Vale de Cambra"};
+        });
         if(best) opts.push({dep:toMin(t1[0]), arr:best.arr,
           legs:[{line:k, stops:d.stops, t:t1}, {line:"1215", stops:c.stops, t:best.t2}],
-          xfer:{kind:"sjm", at:"S. João da Madeira (CCT)", short:"S. João da Madeira", wait:best.dep2-arrSJM, line:"1215"}});
+          xfer:{kind:"sjm", at:"S. João da Madeira (CCT)", short:"S. João da Madeira", wait:best.dep2-arrSJM, line:"1215", alt}});
       });
     });
   }
-  const keep = opts.filter(o=> !opts.some(q=> q!==o && q.dep>=o.dep && q.arr<=o.arr && (q.dep>o.dep || q.arr<o.arr)));
-  // se duas opções forem iguais (mesma partida e chegada), fica a direta
-  const uniq = keep.filter((o,i)=> !keep.some((q,j)=> j<i && q.dep===o.dep && q.arr===o.arr));
+  // só compara opções que partem do mesmo sítio (Campanhã e Camélias são sítios diferentes)
+  const org = o => o.legs[0].stops[0];
+  const keep = opts.filter(o=> !opts.some(q=> q!==o && org(q)===org(o) && q.dep>=o.dep && q.arr<=o.arr && (q.dep>o.dep || q.arr<o.arr)));
+  // se duas opções do mesmo sítio forem iguais (mesma partida e chegada), fica a direta
+  const uniq = keep.filter((o,i)=> !keep.some((q,j)=> j<i && org(q)===org(o) && q.dep===o.dep && q.arr===o.arr));
   return uniq.sort((a,b)=>a.dep-b.dep);
 }
 /* Depois da última ligação possível para Vale de Cambra: autocarros do Porto que só chegam a S. João da Madeira */
@@ -673,15 +742,36 @@ function sjmHTML(list, top, isSel){
   const warn = ida
     ? `<b>Atenção:</b> ${top?hj+" já não há ligação desde Vale de Cambra.":(wk?"ao fim de semana há poucos autocarros de Vale de Cambra para S. João da Madeira, por isso nem todos estes têm ligação.":"depois das opções acima já não há ligação desde Vale de Cambra.")} Estes autocarros partem de <b>S. João da Madeira (CCT)</b> — tens de chegar lá por outra forma (boleia, táxi…).`
     : `<b>Atenção:</b> ${top?hj+" já não há ligação para Vale de Cambra.":"depois das opções acima já não há ligação para Vale de Cambra."} Estes autocarros só te levam até <b>S. João da Madeira (CCT)</b> — a partir daí vais precisar de outra forma de chegar a casa (boleia, táxi…).`;
-  return `<div class="sec"><div class="ttl">${title}</div><div class="m">${list.length} ${hj}</div></div>
+  return `<div class="sjmDet"><div class="sec"><div class="ttl">${title}</div><div class="m">${list.length} ${hj}</div></div>
     <div class="rule"></div>
     <div class="sjmWarn">${warn}</div>
     ${list.map((o,i)=>`<button class="opt sjm" data-s="${i}">
-      <div class="mid"><div class="tt num">${fromMin(o.dep)}<span>→</span>${fromMin(o.arr)}</div>
-      <div class="legs"><span class="chip">${o.legs[0].line}</span> ${ida?"desde":"até"} S. João da Madeira</div></div>
-      <div class="du">${durTxt(o.arr-o.dep)}<br><span style="color:var(--ink)">${ida?"→ ":"de "}${destName(o).replace("Porto (","").replace(")","")}</span></div></button>`).join("")}`;
+      <div class="mid"><div class="tt num">${fromMin(o.dep)} <span class="ttFrom">${fromTxt(o.legs[0].stops[0])}</span></div>
+      <div class="legs">${legsHTML(o)}</div></div>
+      </button>`).join("")}</div>`;
 }
 
+function placeName(n){
+  if(/Vale de Cambra/.test(n)) return "Vale de Cambra";
+  if(/S\. João da Madeira/.test(n)) return "S. João da Madeira";
+  if(/Camélias/.test(n)) return "Porto (Camélias)";
+  if(/Campanh/.test(n)) return "Porto (Campanhã)";
+  return n.replace(" (CCT)","");
+}
+function tripPoints(o){
+  const A=o.legs[0], B=o.legs[1], pts=[{n:placeName(A.stops[0]), t:A.t[0]}];
+  if(B) pts.push({n:placeName(A.stops[A.stops.length-1]), t:A.t[A.t.length-1], t2:B.t[0]});
+  const Z=B||A; pts.push({n:placeName(Z.stops[Z.stops.length-1]), t:Z.t[Z.t.length-1]});
+  return pts;
+}
+function stripLine(o){
+  return `<div class="strip">`+tripPoints(o).map(p=>`<span>${p.n.replace("Porto (","").replace(")","")} <b class="num">${p.t}${p.t2?"–"+p.t2:""}</b></span>`).join('<i>→</i>')+`</div>`;
+}
+function stripBlock(o){
+  const pts=tripPoints(o);
+  return `<div class="pts">`+pts.map((p,k)=>`<div class="pt ${k===0?"a":k===pts.length-1?"z":"m"}"><span class="pd"></span><span class="pn">${p.n}</span><span class="pv num">${p.t2?`${p.t} <small>chega</small> · ${p.t2} <small>sai</small>`:p.t}</span></div>`).join("")+`</div>`;
+}
+function cap(t){ return t.charAt(0).toUpperCase()+t.slice(1); }
 function shortPlace(o, prep){
   const n=destName(o);
   if(/Campanh/.test(n)) return prep==="de" ? "de Campanhã" : "Campanhã";
@@ -691,11 +781,27 @@ function shortPlace(o, prep){
 function destName(o){ const L = pstate.dir==="ida" ? o.legs[o.legs.length-1] : o.legs[0]; const n = pstate.dir==="ida" ? L.stops[L.stops.length-1] : L.stops[0];
   return /Campanh/.test(n) ? "Porto (Campanhã)" : /Camélias/.test(n) ? "Porto (Camélias)" : n.replace(" (CCT)",""); }
 
-function legsHTML(o){
-  if(o.wk) return `<span class="chip">${o.legs[0].line}</span> Direto ${pstate.dir==="ida"?"desde":"até"} S. João da Madeira`;
-  if(!o.xfer) return `<span class="chip">${o.legs[0].line}</span> Direto`;
+function fromTxt(n){ if(/Campanh/.test(n)) return "de Campanhã"; if(/Camélias/.test(n)) return "das Camélias"; if(/Vale de Cambra/.test(n)) return "de Vale de Cambra"; if(/S\. João da Madeira/.test(n)) return "de S. João da Madeira"; return "de "+n; }
+function toTxt(n){ if(/Campanh/.test(n)) return "para Campanhã"; if(/Camélias/.test(n)) return "para as Camélias"; if(/Vale de Cambra/.test(n)) return "para Vale de Cambra"; if(/S\. João da Madeira/.test(n)) return "para S. João da Madeira"; return "para "+n; }
+function bestRest(o){
+  const A=o.legs[0], B=o.legs[1], Z=B||A, dest=Z.stops[Z.stops.length-1];
+  if(!o.xfer){
+    const porto = /Campanh|Camélias/.test(dest);
+    return (porto||o.wk) ? `<div class="legs"><span class="from">Direto ${toTxt(dest)}</span></div>` : `<div class="legs"><span class="from">Direto</span></div>`;
+  }
+  const w=o.xfer.wait;
+  return `<div class="legs"><span class="chain">→ S. João da Madeira → <span class="chip">${B.line}</span> ${toTxt(dest)}</span><span class="xf">O ${B.line} sai às <b class="num">${B.t[0]}</b> · ${w<TIGHT?`<span class="tight">Troca apertada · ${w} min</span>`:`${w} min para a troca`}</span>${w<TIGHT&&o.xfer.alt?`<div class="altLine">Se perderes a ligação, há o ${o.xfer.alt.line} das ${fromMin(o.xfer.alt.dep)} e chegas às ${fromMin(o.xfer.alt.arr)}.</div>`:""}</div>`;
+}
+function legsHTML(o, withTimes=true, past=false){
+  const A=o.legs[0], B=o.legs[1], Z=B||A;
+  const orig=A.stops[0], dest=Z.stops[Z.stops.length-1];
+  const porto = n => /Campanh|Camélias/.test(n);
+  if(!o.xfer){
+    const showTo = porto(dest) || o.wk || o.sjmOnly;
+    return `<span class="chip">${A.line}</span> <span class="from">Direto${showTo?" "+toTxt(dest):""}</span>`;
+  }
   const w = o.xfer.wait;
-  return `<span class="chip">${o.legs[0].line}</span> → <span class="chip">${o.legs[1].line}</span> ${w<TIGHT?`<span class="tight">Troca apertada · ${w} min</span>`:`<span class="xf">troca em S. João · ${w} min</span>`}`;
+  return `<span class="chain"><span class="chip">${A.line}</span> → S. João da Madeira → <span class="chip">${B.line}</span> ${toTxt(dest)}</span><span class="xf">O ${B.line} sai às <b class="num">${B.t[0]}</b> · ${w<TIGHT&&!past?`<span class="tight">Troca apertada · ${w} min</span>`:`${w} min para a troca`}</span>${w<TIGHT&&!past&&o.xfer.alt?`<div class="altLine">Se perderes a ligação, há o ${o.xfer.alt.line} das ${fromMin(o.xfer.alt.dep)} e chegas às ${fromMin(o.xfer.alt.arr)}.</div>`:""}`;
 }
 
 function nextDayWithService(){
@@ -736,7 +842,9 @@ function renderPorto(){
   document.getElementById("pPer").innerHTML = "";
   renderPSeg();
 
-  const opts = portoOptions(dt).filter(o=>o.dep>=now);
+  const allOpts = portoOptions(dt);
+  const opts = allOpts.filter(o=>o.dep>=now);
+  const pastOpts = allOpts.filter(o=>o.dep<now);
   const hasOpts = opts.length>0;
   const sjmL = sjmOnlyToday(dt, now);
   const sT=document.getElementById("pSjmTop"), sB=document.getElementById("pSjmBottom");
@@ -744,10 +852,16 @@ function renderPorto(){
   sB.innerHTML = hasOpts ? sjmHTML(sjmL, false, isSel) : "";
   [sT,sB].forEach(box=> box.querySelectorAll(".opt.sjm").forEach(x=> x.onclick=()=> openTrip(sjmL[+x.dataset.s])));
   const best = document.getElementById("pBest"), list=document.getElementById("pList");
-  document.getElementById("pOtherHead").hidden = !hasOpts;
+  const optRow = (o,idx,past) => `<button class="opt${past?" pastOpt":""}" data-${past?"p":"i"}="${idx}">
+      <div class="mid"><div class="tt num">${fromMin(o.dep)} <span class="ttFrom">${fromTxt(o.legs[0].stops[0])}</span></div><div class="legs">${legsHTML(o,true,past)}</div></div>
+      </button>`;
+  const pastHTML = pastOpts.map((o,k)=>optRow(o,k,true)).join("");
+  const bindPast = ()=> list.querySelectorAll(".opt.pastOpt").forEach(x=> x.onclick=()=> openTrip(pastOpts[+x.dataset.p]));
+  document.getElementById("pOtherHead").hidden = !hasOpts && !pastOpts.length;
   if(!hasOpts){
     best.innerHTML = sjmL.length ? "" : `<div class="pNone"><div class="a">${isSel?"Hoje já não há autocarros":"Não há autocarros neste dia"}</div></div>`;
-    list.innerHTML = ""; setPNote(dt); return;
+    document.getElementById("pCount").textContent = pastOpts.length ? "já passaram" : "";
+    list.innerHTML = pastHTML; bindPast(); setPNote(dt); return;
   }
   const isToday = isSel, dayLbl = "neste dia";
   const o0 = opts[0];
@@ -756,18 +870,17 @@ function renderPorto(){
   best.innerHTML = `
     <button class="best" id="bestBtn">
       <div class="bestK">${isToday ? "A melhor opção" : "Primeira do dia"}</div>
-      <div class="nxTop"><span class="nxTime num">${fromMin(o0.dep)}</span>${isToday?`<span class="nxIn">${inTxt}</span>`:""}</div>
-      <div class="bestArr">${pstate.dir==="ida" ? `Chegas às <b class="num">${fromMin(o0.arr)}</b> · ${shortPlace(o0,"a")}` : `Sai ${shortPlace(o0,"de")} · chegas às <b class="num">${fromMin(o0.arr)}</b>`} · ${durTxt(o0.arr-o0.dep)}</div>
-      <div class="legs">${legsHTML(o0)}</div>
+      <div class="nxTop"><span class="nxTime num">${fromMin(o0.dep)}</span></div>
+      <div class="bestArr nxOne"><span class="chip">${o0.legs[0].line}</span> Sai ${fromTxt(o0.legs[0].stops[0])}${isToday?` <span class="nw">· <span class="inRed">${inTxt}</span></span>`:""}</div>
+      ${bestRest(o0)}
     </button>`;
   document.getElementById("bestBtn").onclick = ()=> openTrip(o0);
   const rest = opts.slice(1);
   document.getElementById("pCount").textContent = rest.length ? `${rest.length} ${isToday?"hoje":dayLbl}` : "";
-  list.innerHTML = rest.length ? rest.map((o,i)=>`<button class="opt" data-i="${i+1}">
-      <div class="mid"><div class="tt num">${fromMin(o.dep)}<span>→</span>${fromMin(o.arr)}</div><div class="legs">${legsHTML(o)}</div></div>
-      <div class="du">${durTxt(o.arr-o.dep)}<br><span style="color:var(--ink)">${pstate.dir==="ida"?"→ ":"de "}${destName(o).replace("Porto (","").replace(")","")}</span></div></button>`).join("")
-    : `<div class="pNone"><div class="b">Não há mais opções ${isToday?"hoje":dayLbl}.</div></div>`;
-  list.querySelectorAll(".opt").forEach(x=> x.onclick=()=> openTrip(opts[+x.dataset.i]));
+  list.innerHTML = pastHTML + (rest.length ? rest.map((o,i)=>optRow(o,i+1,false)).join("")
+    : `<div class="pNone"><div class="b">Não há mais opções ${isToday?"hoje":dayLbl}.</div></div>`);
+  list.querySelectorAll(".opt:not(.pastOpt)").forEach(x=> x.onclick=()=> openTrip(opts[+x.dataset.i]));
+  bindPast();
   setPNote(dt);
 }
 function setPNote(dt){
@@ -787,7 +900,7 @@ function openTrip(o){
     if(li===1){
       html += o.xfer.kind==="oaz"
         ? `<div class="xfer">Troca em <b>Praça José da Costa (OAZ)</b> — a mesma paragem onde sais.<br>Espera cerca de <b>${durTxt(o.xfer.wait)}</b>. O ${o.xfer.line} sai da EBS Soares de Basto às ${o.xfer.ebs} e passa na praça por volta das ${fromMin(o.xfer.pass)}.</div>`
-        : `<div class="xfer">Troca em <b>${o.xfer.at}</b> — o ${o.xfer.line} parte do mesmo terminal onde sais.<br>Espera <b>${durTxt(o.xfer.wait)}</b>.${o.xfer.wait<TIGHT?`<div class="tightBox"><b>Atenção:</b> a margem é pequena. Se o primeiro autocarro se atrasar por causa do trânsito, podes perder a ligação. Considera apanhar uma opção mais cedo.</div>`:""}</div>`;
+        : `<div class="xfer">Troca em <b>${o.xfer.at}</b> — o ${o.xfer.line} parte do mesmo terminal onde sais.<br>Espera <b>${durTxt(o.xfer.wait)}</b>.${o.xfer.wait<TIGHT?`<div class="tightBox"><b>Atenção:</b> a margem é pequena. Se o primeiro autocarro se atrasar por causa do trânsito, podes perder a ligação.${o.xfer.alt?` <b>Se perderes a ligação, há o ${o.xfer.alt.line} das ${fromMin(o.xfer.alt.dep)}</b> e chegas às ${fromMin(o.xfer.alt.arr)} (mais ${o.xfer.alt.arr-o.arr} min).`:""}</div>`:""}</div>`;
     }
     html += `<div class="legHead"><span class="chip">${L.line}</span>${L.stops[0].replace(" (CCT)","")} → ${L.stops.slice(-1)[0].replace(" (CCT)","")}</div>`;
     html += L.stops.map((n,i)=>`<div class="stop ${i===0||i===L.stops.length-1?"end":""}"><span class="n">${pad(i+1)}</span><span class="nm">${n}</span><span class="tm num">${L.est0&&i===0?'<span class="est">≈ </span>':''}${L.t[i]}</span></div>`).join("");
@@ -814,3 +927,4 @@ setInterval(()=>{ tick(); renderNext(); renderTimes(); }, 30000);
 </script>
 </body>
 </html>
+
